@@ -1493,6 +1493,28 @@
       "responseTimeMs": 5787,
       "workerBucket": "RANDOM_FAST",
       "effectiveDelayMs": 5716
+    },
+    "TX-1780027946497": {
+      "target": "123",
+      "amount": "123",
+      "status": "APROBADO",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780027946497,
+      "processedAt": 1780027961838,
+      "responseTimeMs": 15341,
+      "workerBucket": "RANDOM_FAST",
+      "effectiveDelayMs": 15272
+    },
+    "TX-1780028107626": {
+      "target": "98765",
+      "amount": "100",
+      "status": "APROBADO",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780028107626,
+      "processedAt": 1780028123175,
+      "responseTimeMs": 15549,
+      "workerBucket": "RANDOM_FAST",
+      "effectiveDelayMs": 15539
     }
   }
 }

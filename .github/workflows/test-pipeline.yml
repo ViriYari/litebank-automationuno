@@ -29,23 +29,30 @@ jobs:
       - name: Ver contenedores
         run: docker ps
 
-      # 5. Esperar backend
-      - name: Wait for backend-server
+      # 5. Esperar backend y Kafka
+      - name: Wait for backend-server and Kafka
         run: |
-          echo "Esperando que el puerto 8080 responda..."
+          echo "Esperando backend y conectividad con Kafka..."
           for i in {1..60}; do
+            # 1. Verificar si el puerto 8080 responde
             if nc -z localhost 8080 > /dev/null 2>&1; then
-              echo "Backend server puerto 8080 abierto y listo"
-              exit 0
+              # 2. Verificar si puede alcanzar a Kafka desde el host de CI
+              if nc -z localhost 9092 > /dev/null 2>&1; then
+                echo "✓ Backend y Kafka detectados."
+                exit 0
+              else
+                echo "  Intento $i - Backend en 8080, pero Kafka (9092) no responde..."
+              fi
+            else
+              echo "  Intento $i - Backend no responde en 8080..."
             fi
-            echo "  Intento $i - backend no responde aún..."
             sleep 3
           done
-          echo " Backend no respondió a tiempo"
+          echo "✗ Timeout: Backend o Kafka no disponibles"
           docker logs qa-backend-server
           exit 1
 
-      # 5. Esperar frontend
+      # 6. Esperar frontend
       - name: Esperar frontend
         run: |
           echo "Esperando frontend..."
@@ -61,13 +68,18 @@ jobs:
           docker logs qa-frontend || true
           exit 1
 
-      # 6. Ejecutar tests
+      # Debug de worker en caso de error
+      - name: Debug logs worker
+        if: failure()
+        run: docker logs qa-backend-worker
+
+      # 7. Ejecutar tests
       - name: Ejecutar tests
         run: mvn test
         env:
           BASE_URL: http://localhost:5173
 
-      # 7. Apagar servicios siempre
+      # 8. Apagar servicios siempre
       - name: Apagar Docker
         if: always()
         run: docker compose down
