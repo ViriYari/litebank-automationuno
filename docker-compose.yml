@@ -51,7 +51,6 @@ services:
         done
         /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic transferencias-creadas --partitions 1 --replication-factor 1
         echo "Topic transferencias-creadas listo"
-        
     networks:
       - qa-network
 
@@ -73,6 +72,36 @@ services:
         condition: service_started
       kafka-init-topic:
         condition: service_completed_successfully
+    networks:
+      - qa-network
+
+  backend-worker:
+    image: node:22
+    container_name: qa-backend-worker
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "
+      echo 'Esperando Kafka broker...';
+      until nc -z kafka 29092; do
+        echo 'Kafka no listo...';
+        sleep 2;
+      done;
+      echo 'Kafka disponible. Iniciando worker...';
+      npm run start-worker;
+      "
+    environment:
+      KAFKA_BROKER: kafka:29092
+      NODE_ENV: production
+    depends_on:
+      kafka:
+        condition: service_started
+      kafka-init-topic:
+        condition: service_completed_successfully
+      backend-server:
+        condition: service_started
     networks:
       - qa-network
 
