@@ -34,6 +34,7 @@ public class TransferTest extends BaseTest {
     
     // 4. Verificamos que sea igual
    Assertions.assertTrue(statusFinal.contains("APROBADO"), "El mensaje final debería contener APROBADO, pero es: " + statusFinal);
+   
     
     
 }

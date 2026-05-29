@@ -54,19 +54,17 @@ public class TransferPage {
  }
     
     public String getStatusMessage() {
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
     try {
-        // Esperamos el estado final
-        wait.until(ExpectedConditions.textToBePresentInElementLocated(processingMsg, "Estado: APROBADO"));
+        // Esperamos a que el estado sea APROBADO
+        wait.until(ExpectedConditions.textToBe(processingMsg, "Estado: APROBADO"));
     } catch (org.openqa.selenium.TimeoutException e) {
-        // AQUÍ ES DONDE OCURRE EL FALLO: Tomamos la captura inmediatamente
-        tomarEvidencia("FALLO_EN_ESTADO_FINAL");
+        // Si falla, capturamos el texto que está ahí en ese momento
+        WebElement element = driver.findElement(processingMsg);
+        String textoActual = element.getText();
         
-        // Obtenemos el texto que causó el problema
-        String textoActual = driver.findElement(processingMsg).getText();
-        
-        // Lanzamos el error con el contexto
+        // Lanzamos un error con el mensaje real que obtuvimos
         throw new RuntimeException("El test falló esperando APROBADO. El estado actual es: " + textoActual);
     }
 
@@ -81,15 +79,20 @@ public void tomarEvidencia(String nombre) {
             directory.mkdirs();
         }
         
-        // 2. Tomar y guardar la captura
-        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        // 2. Definir la ruta del archivo
         File destFile = new File(directory, System.currentTimeMillis() + "_" + nombre + ".png");
+        
+        // 3. Imprimir la ruta completa en los logs (ESTO ES LO QUE TE AYUDARÁ A DEPURAR)
+        System.out.println("DEBUG: Intentando guardar en -> " + destFile.getAbsolutePath());
+        
+        // 4. Tomar y copiar la captura
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(screenshot, destFile);
         
-        System.out.println("Evidencia guardada en: " + destFile.getAbsolutePath());
+        System.out.println("Evidencia guardada exitosamente.");
     } catch (Exception e) {
         System.err.println("Error crítico al tomar captura: " + e.getMessage());
-        e.printStackTrace(); // Esto te dirá exactamente por qué falla
+        e.printStackTrace(); 
     }
 }
 
