@@ -23,7 +23,7 @@ jobs:
 
       # 3. Levantar Docker (Kafka + frontend + todo)
       - name: Levantar servicios
-        run: docker compose up -d --build
+        run: ODE_ENV=development docker compose up -d --build
 
       # 4. Ver contenedores (debug)
       - name: Ver contenedores
@@ -72,8 +72,8 @@ jobs:
       - name: Debug logs worker
         if: always()
         run: |
-          echo "--- Últimos 50 logs del worker ---"
-          docker logs qa-backend-worker --tail 50
+          echo "--- Últimos 100 logs del worker ---"
+          docker logs qa-backend-worker --tail 100
           
       # 7. Ejecutar tests
       - name: Ejecutar tests
