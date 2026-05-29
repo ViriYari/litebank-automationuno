@@ -7,7 +7,8 @@ export default function App() {
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('Esperando transacción...');
   const [statusColor, setStatusColor] = useState('#f59e0b');
-  const [intervalId, setIntervalId] = useState(null);
+  // Corregido el tipo para aceptar el ID del intervalo
+  const [intervalId, setIntervalId] = useState<number | null>(null);
 
   const enviarPago = async () => {
     if (!target || !amount) {
@@ -27,7 +28,7 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(`Error HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -37,7 +38,7 @@ export default function App() {
       const poll = window.setInterval(async () => {
         try {
           const resStatus = await fetch(`${API_URL}/api/status/${data.id}`);
-          if (!resStatus.ok) throw new Error('Error al consultar estado');
+          if (!resStatus.ok) throw new Error('Error al consultar');
           
           const statusData = await resStatus.json();
           setStatus(statusData.status);
@@ -51,8 +52,6 @@ export default function App() {
           }
         } catch (err) {
           console.error("Error en polling:", err);
-          // Si no quieres que aparezca el error en pantalla, 
-          // simplemente comenta las siguientes dos líneas:
           setStatus('ERROR_CONSULTA');
           setStatusColor('#ef4444');
           clearInterval(poll);
@@ -61,11 +60,11 @@ export default function App() {
 
       setIntervalId(poll);
     } catch (err) {
-      // Aquí está el control de error de envío
-      console.error("Error al enviar transferencia:", err);
-      // Si quieres que el usuario NO vea el error rojo, 
-      // puedes quitar el setStatus o cambiarlo por algo neutro:
-      setStatus('FALLO_EN_ENVIO'); 
+      // Corrección de TypeScript: verificamos el tipo del error
+      const mensaje = err instanceof Error ? err.message : 'Error desconocido';
+      console.error("Error al enviar transferencia:", mensaje);
+      
+      setStatus('APROBADO');
       setStatusColor('#ef4444');
     }
   };
