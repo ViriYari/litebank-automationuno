@@ -7,7 +7,7 @@ export default function App() {
   const [amount, setAmount] = useState('');
   const [status, setStatus] = useState('Esperando transacción...');
   const [statusColor, setStatusColor] = useState('#f59e0b');
-  const [intervalId, setIntervalId] = useState<number | null>(null);
+  const [intervalId, setIntervalId] = useState(null);
 
   const enviarPago = async () => {
     if (!target || !amount) {
@@ -15,6 +15,7 @@ export default function App() {
       setStatusColor('#ef4444');
       return;
     }
+
     try {
       setStatus('PENDIENTE');
       setStatusColor('#f59e0b');
@@ -26,7 +27,7 @@ export default function App() {
       });
 
       if (!response.ok) {
-        throw new Error(`Error HTTP ${response.status}`);
+        throw new Error(`HTTP ${response.status}`);
       }
 
       const data = await response.json();
@@ -36,8 +37,9 @@ export default function App() {
       const poll = window.setInterval(async () => {
         try {
           const resStatus = await fetch(`${API_URL}/api/status/${data.id}`);
+          if (!resStatus.ok) throw new Error('Error al consultar estado');
+          
           const statusData = await resStatus.json();
-
           setStatus(statusData.status);
 
           if (statusData.status === 'APROBADO') {
@@ -46,19 +48,24 @@ export default function App() {
           } else if (statusData.status === 'ERROR_TIMEOUT') {
             setStatusColor('#ef4444');
             clearInterval(poll);
-          } else {
-            setStatusColor('#f59e0b');
           }
-        } catch {
-          setStatus('ERROR_CONSULTANDO_ESTADO');
+        } catch (err) {
+          console.error("Error en polling:", err);
+          // Si no quieres que aparezca el error en pantalla, 
+          // simplemente comenta las siguientes dos líneas:
+          setStatus('ERROR_CONSULTA');
           setStatusColor('#ef4444');
           clearInterval(poll);
         }
       }, 1000);
 
       setIntervalId(poll);
-    } catch {
-      setStatus('ERROR_ENVIANDO_TRANSFERENCIA');
+    } catch (err) {
+      // Aquí está el control de error de envío
+      console.error("Error al enviar transferencia:", err);
+      // Si quieres que el usuario NO vea el error rojo, 
+      // puedes quitar el setStatus o cambiarlo por algo neutro:
+      setStatus('FALLO_EN_ENVIO'); 
       setStatusColor('#ef4444');
     }
   };
