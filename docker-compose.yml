@@ -83,7 +83,8 @@ services:
     command: >
       sh -c "
       echo 'Esperando Kafka broker...';
-      until nc -z kafka 29092; do
+      # Usamos /dev/tcp, que es nativo de bash y no requiere nc instalado
+      until (echo > /dev/tcp/kafka/29092) >/dev/null 2>&1; do
         echo 'Kafka no listo...';
         sleep 2;
       done;
