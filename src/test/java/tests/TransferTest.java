@@ -15,28 +15,27 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class TransferTest extends BaseTest {
 
 @Test
-    void e2e_transfer_test() {
-        TransferPage page = new TransferPage(driver);
-        
-        // 1. Abrir aplicación
+void e2e_transfer_test() {
+    TransferPage page = new TransferPage(driver);
+    
+    try {
         page.openApp();
-       page.tomarEvidencia("1_inicio_app");
-        // 2. Ejecutar flujo
+        page.tomarEvidencia("1_inicio_app"); 
+        
         page.createTransfer("98765", "100");
-       
-     String mensajeEsperado = "Estado: APROBADO";
-     
-    // 3. Capturamos el texto para la validación final
-    String statusFinal = page.getStatusMessage();
-    page.tomarEvidencia("2_despues_de_click");
-    //System.out.println("EL MENSAJE FINAL OBTENIDO ES: " + statusFinal);
-    page.tomarEvidencia("3_estado_final");
-    
-    // 4. Verificamos que sea igual
-   Assertions.assertTrue(statusFinal.contains("APROBADO"), "El mensaje final debería contener APROBADO, pero es: " + statusFinal);
-   
-    
-    
+        page.tomarEvidencia("2_despues_de_click"); 
+        
+        String statusFinal = page.getStatusMessage();
+        page.tomarEvidencia("3_estado_final");
+        
+        Assertions.assertTrue(statusFinal.contains("APROBADO"), "El estado final es: " + statusFinal);
+        
+    } catch (Exception e) {
+        // Esta captura de emergencia nos dirá qué pasó justo antes de morir
+        page.tomarEvidencia("ERROR_INESPERADO");
+        e.printStackTrace(); // Esto imprimirá el error real en los logs de GitHub Actions
+        throw e; // Relanzamos el error para que el test marque fallido
+    }
 }
     }
 
