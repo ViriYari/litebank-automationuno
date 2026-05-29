@@ -38,25 +38,43 @@ services:
     image: apache/kafka:3.8.0
     container_name: qa-kafka-init-topic
     depends_on:
-      - kafka
+      kafka:
+        condition: service_started
     command:
       - /bin/sh
       - -c
       - |
+        # 1. Tu lógica original
         echo "Esperando broker Kafka..."
         until /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --list >/dev/null 2>&1; do
           sleep 2
         done
-        /opt/kafka/bin/kafka-topics.sh \
-          --bootstrap-server kafka:29092 \
-          --create \
-          --if-not-exists \
-          --topic transferencias-creadas \
-          --partitions 1 \
-          --replication-factor 1
+        /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic transferencias-creadas --partitions 1 --replication-factor 1
         echo "Topic transferencias-creadas listo"
+        
+        # 2. Comando para mantener el contenedor vivo indefinidamente
         tail -f /dev/null
-    restart: "no"
+    networks:
+      - qa-network
+
+  backend-server:
+    image: node:22
+    container_name: qa-backend-server
+    restart: on-failure
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: sh -c "npm install && npm run start-server"
+    ports:
+      - "8080:3000"
+    environment:
+      KAFKA_BROKER: kafka:29092
+      NODE_ENV: production
+    depends_on:
+      kafka:
+        condition: service_started
+      kafka-init-topic:
+        condition: service_completed_successfully
     networks:
       - qa-network
 
