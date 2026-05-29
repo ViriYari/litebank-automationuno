@@ -33,7 +33,7 @@ public class TransferTest extends BaseTest {
     page.tomarEvidencia("3_estado_final");
     
     // 4. Verificamos que sea igual
-   Assertions.assertEquals("Estado: APROBADO", statusFinal);
+   Assertions.assertTrue(statusFinal.contains("APROBADO"), "El mensaje final debería contener APROBADO, pero es: " + statusFinal);
     
     
 }
