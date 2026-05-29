@@ -1,11 +1,18 @@
 package pages;
 
+import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions; // Importante
 import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
+import java.io.File; // Para la clase File
+import org.openqa.selenium.OutputType; // Para OutputType
+import org.openqa.selenium.TakesScreenshot; // Para TakesScreenshot
+import org.apache.commons.io.FileUtils; // Para FileUtils
 
 public class TransferPage {
 
@@ -45,24 +52,48 @@ public class TransferPage {
         fillForm(target, amount);
         clickSend();
  }
- 
+    
     public String getStatusMessage() {
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(100));
+    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 
     try {
-        // Esperamos a que el estado sea APROBADO
-        wait.until(ExpectedConditions.textToBe(processingMsg, "Estado: APROBADO"));
+        // Esperamos el estado final
+        wait.until(ExpectedConditions.textToBePresentInElementLocated(processingMsg, "Estado: APROBADO"));
     } catch (org.openqa.selenium.TimeoutException e) {
-        // Si falla, capturamos el texto que está ahí en ese momento
-        WebElement element = driver.findElement(processingMsg);
-        String textoActual = element.getText();
+        // AQUÍ ES DONDE OCURRE EL FALLO: Tomamos la captura inmediatamente
+        tomarEvidencia("FALLO_EN_ESTADO_FINAL");
         
-        // Lanzamos un error con el mensaje real que obtuvimos
+        // Obtenemos el texto que causó el problema
+        String textoActual = driver.findElement(processingMsg).getText();
+        
+        // Lanzamos el error con el contexto
         throw new RuntimeException("El test falló esperando APROBADO. El estado actual es: " + textoActual);
     }
 
     return driver.findElement(processingMsg).getText();
 }
+
+public void tomarEvidencia(String nombre) {
+    try {
+        // 1. Asegurar que el directorio existe
+        File directory = new File("target/screenshots");
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+        
+        // 2. Tomar y guardar la captura
+        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        File destFile = new File(directory, System.currentTimeMillis() + "_" + nombre + ".png");
+        FileUtils.copyFile(screenshot, destFile);
+        
+        System.out.println("Evidencia guardada en: " + destFile.getAbsolutePath());
+    } catch (Exception e) {
+        System.err.println("Error crítico al tomar captura: " + e.getMessage());
+        e.printStackTrace(); // Esto te dirá exactamente por qué falla
+    }
+}
+
+
 /*public String getStatusMessage() {
 
     long startTime = System.currentTimeMillis();

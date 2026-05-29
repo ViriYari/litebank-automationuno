@@ -66,6 +66,13 @@ jobs:
         env:
           BASE_URL: http://localhost:5173
 
+      - name: Subir evidencias a GitHub
+        if: always() # Importante: esto permite ver las fotos aunque el test falle
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-del-test
+          path: target/screenshots/    
+
       - name: Capturar logs finales del servidor
         if: always()
         run: docker logs qa-backend-server --tail 100    

@@ -1548,6 +1548,78 @@
       "responseTimeMs": 45108,
       "workerBucket": "RANDOM_SLOW_TIMEOUT",
       "effectiveDelayMs": 45107
+    },
+    "TX-1780035103492": {
+      "target": "1",
+      "amount": "1",
+      "status": "PENDIENTE",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780035103492,
+      "processedAt": null,
+      "responseTimeMs": null,
+      "workerBucket": null
+    },
+    "TX-1780035104406": {
+      "target": "1",
+      "amount": "1",
+      "status": "PENDIENTE",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780035104406,
+      "processedAt": null,
+      "responseTimeMs": null,
+      "workerBucket": null
+    },
+    "TX-1780035105120": {
+      "target": "1",
+      "amount": "1",
+      "status": "PENDIENTE",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780035105120,
+      "processedAt": null,
+      "responseTimeMs": null,
+      "workerBucket": null
+    },
+    "TX-1780035405718": {
+      "target": "3",
+      "amount": "3",
+      "status": "PENDIENTE",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780035405718,
+      "processedAt": null,
+      "responseTimeMs": null,
+      "workerBucket": null
+    },
+    "TX-1780035407316": {
+      "target": "3",
+      "amount": "3",
+      "status": "PENDIENTE",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780035407316,
+      "processedAt": null,
+      "responseTimeMs": null,
+      "workerBucket": null
+    },
+    "TX-1780036626425": {
+      "target": "98765",
+      "amount": "100",
+      "status": "ERROR_TIMEOUT",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780036626425,
+      "processedAt": 1780036677064,
+      "responseTimeMs": 50639,
+      "workerBucket": "RANDOM_SLOW_TIMEOUT",
+      "effectiveDelayMs": 50585
+    },
+    "TX-1780036772491": {
+      "target": "98765",
+      "amount": "100",
+      "status": "APROBADO",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780036772491,
+      "processedAt": 1780036783463,
+      "responseTimeMs": 10972,
+      "workerBucket": "RANDOM_FAST",
+      "effectiveDelayMs": 10954
     }
   }
 }
