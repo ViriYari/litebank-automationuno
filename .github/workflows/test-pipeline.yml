@@ -34,24 +34,39 @@ jobs:
         run: |
           echo "Esperando que el puerto 8080 responda..."
           for i in {1..60}; do
-            # nc -z verifica si el puerto está abierto sin enviar datos
             if nc -z localhost 8080 > /dev/null 2>&1; then
-              echo "✓ Backend server puerto 8080 abierto y listo"
+              echo "Backend server puerto 8080 abierto y listo"
               exit 0
             fi
             echo "  Intento $i - backend no responde aún..."
             sleep 3
           done
-          echo "✗ Backend no respondió a tiempo"
+          echo " Backend no respondió a tiempo"
           docker logs qa-backend-server
           exit 1
-      
-      # 6. Ejecutar tests con variable base URL
+
+      # 5. Esperar frontend
+      - name: Esperar frontend
+        run: |
+          echo "Esperando frontend..."
+          for i in {1..60}; do
+            if curl -fsS http://localhost:5173 > /dev/null 2>&1; then
+              echo "OK frontend"
+              exit 0
+            fi
+            echo "Intento $i - frontend no listo..."
+            sleep 3
+          done
+          echo "Frontend NO disponible"
+          docker logs qa-frontend || true
+          exit 1
+
+      # 6. Ejecutar tests
       - name: Ejecutar tests
         run: mvn test
         env:
           BASE_URL: http://localhost:5173
-    
+
       # 7. Apagar servicios siempre
       - name: Apagar Docker
         if: always()
