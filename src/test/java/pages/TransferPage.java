@@ -45,18 +45,23 @@ public class TransferPage {
         fillForm(target, amount);
         clickSend();
  }
+ 
     public String getStatusMessage() {
-    // Esto espera a que el elemento sea visible y devuelve su texto actual
     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(100));
 
-    wait.until(
-        ExpectedConditions.textToBe(processingMsg, "Estado: APROBADO")
-    );
+    try {
+        // Esperamos a que el estado sea APROBADO
+        wait.until(ExpectedConditions.textToBe(processingMsg, "Estado: APROBADO"));
+    } catch (org.openqa.selenium.TimeoutException e) {
+        // Si falla, capturamos el texto que está ahí en ese momento
+        WebElement element = driver.findElement(processingMsg);
+        String textoActual = element.getText();
+        
+        // Lanzamos un error con el mensaje real que obtuvimos
+        throw new RuntimeException("El test falló esperando APROBADO. El estado actual es: " + textoActual);
+    }
 
-    WebElement element = driver.findElement(processingMsg);
-
-    //System.out.println("EL TEXTO REAL EN EL STATUS-BOX ES: " + element.getText());
-    return element.getText();
+    return driver.findElement(processingMsg).getText();
 }
 /*public String getStatusMessage() {
 

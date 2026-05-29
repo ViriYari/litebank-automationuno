@@ -97,7 +97,7 @@ services:
       " && npm run start-worker
     environment:
       KAFKA_BROKER: kafka:29092
-      NODE_ENV: production
+      NODE_ENV: development
     depends_on:
       kafka:
         condition: service_started

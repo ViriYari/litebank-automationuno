@@ -72,7 +72,9 @@ jobs:
       - name: Debug logs worker
         if: always()
         run: |
-          echo "--- Últimos 100 logs del worker ---"
+          echo "--- Estado de los procesos del worker ---"
+          docker exec qa-backend-worker ps aux
+          echo "--- Últimos logs del worker ---"
           docker logs qa-backend-worker --tail 100
           
       # 7. Ejecutar tests
