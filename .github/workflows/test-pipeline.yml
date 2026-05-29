@@ -10,83 +10,62 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Clonar repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Configurar Java
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
 
-      # 3. Levantar Docker (Kafka + frontend + todo)
       - name: Levantar servicios
         run: |
           docker compose up -d --build
-          echo "Esperando 15 segundos para estabilizar el clúster de Kafka..."
-          sleep 15
+          echo "Servicios iniciando..."
 
-      # 4. Ver contenedores (debug)
-      - name: Ver contenedores
-        run: docker ps
-
-      # 5. Esperar backend y Kafka
-      - name: Wait for backend-server and Kafka
+      - name: Esperar conectividad total
         run: |
-          echo "Esperando backend y conectividad con Kafka..."
-          for i in {1..60}; do
-            # 1. Verificar si el puerto 8080 responde
-            if nc -z localhost 8080 > /dev/null 2>&1; then
-              # 2. Verificar si puede alcanzar a Kafka desde el host de CI
-              if nc -z localhost 9092 > /dev/null 2>&1; then
-                echo "✓ Backend y Kafka detectados."
-                exit 0
-              else
-                echo "  Intento $i - Backend en 8080, pero Kafka (9092) no responde..."
-              fi
-            else
-              echo "  Intento $i - Backend no responde en 8080..."
-            fi
-            sleep 3
-          done
-          echo "✗ Timeout: Backend o Kafka no disponibles"
-          docker logs qa-backend-server
-          exit 1
-
-      # 6. Esperar frontend
-      - name: Esperar frontend
-        run: |
-          echo "Esperando frontend..."
-          for i in {1..60}; do
-            if curl -fsS http://localhost:5173 > /dev/null 2>&1; then
-              echo "OK frontend"
+          echo "Esperando que los servicios respondan..."
+          for i in {1..40}; do
+            if nc -z localhost 8080 && nc -z localhost 9092 && nc -z localhost 5173; then
+              echo "✓ Todos los servicios están listos."
               exit 0
             fi
-            echo "Intento $i - frontend no listo..."
-            sleep 3
+            echo "Intento $i - Esperando servicios (Backend 8080, Kafka 9092, Frontend 5173)..."
+            sleep 5
           done
-          echo "Frontend NO disponible"
-          docker logs qa-frontend || true
+          echo "✗ Timeout: Servicios no disponibles"
+          docker ps
           exit 1
 
-      # Debug de worker en caso de error
       - name: Debug logs worker
         if: always()
         run: |
-          echo "--- Estado de los procesos del worker ---"
-          docker exec qa-backend-worker ps aux
-          echo "--- Últimos logs del worker ---"
-          docker logs qa-backend-worker --tail 100
+          echo "--- Logs del worker ---"
+          docker logs qa-backend-worker --tail 50
+
+      - name: Diagnóstico de conexión Kafka
+        run: |
+          echo "Buscando red de Docker..."
+          NETWORK_NAME=$(docker network ls --format "{{.Name}}" | grep qa-network)
+          echo "Red encontrada: $NETWORK_NAME"
           
-      # 7. Ejecutar tests
+          echo "Probando conexión hacia el Broker..."
+          docker run --rm --network $NETWORK_NAME busybox nc -zv kafka 29092
+          
+          if [ $? -eq 0 ]; then
+            echo "✓ Conectividad confirmada."
+          else
+            echo "✗ Error: No hay conexión con el Broker desde esta red."
+            exit 1
+          fi
+
       - name: Ejecutar tests
         run: mvn test
         env:
           BASE_URL: http://localhost:5173
 
-      # 8. Apagar servicios siempre
       - name: Apagar Docker
         if: always()
         run: docker compose down
