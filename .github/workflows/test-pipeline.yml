@@ -72,9 +72,7 @@ jobs:
       - name: Debug logs worker
         if: always()
         run: |
-          echo "--- BUSCANDO ERRORES EN EL WORKER ---"
-          # Buscamos específicamente cualquier línea que contenga 'Error' o 'Exception'
-          docker logs qa-backend-worker | grep -iE 'error|exception|fail' || echo "No se encontraron errores directos, mostrando últimos logs:"
+          echo "--- Últimos 50 logs del worker ---"
           docker logs qa-backend-worker --tail 50
           
       # 7. Ejecutar tests

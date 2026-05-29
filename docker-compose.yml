@@ -81,16 +81,20 @@ services:
     volumes:
       - ./backend:/app
     command: >
-      sh -c "
-      echo 'Esperando Kafka broker...';
-      # Usamos /dev/tcp, que es nativo de bash y no requiere nc instalado
-      until (echo > /dev/tcp/kafka/29092) >/dev/null 2>&1; do
-        echo 'Kafka no listo...';
-        sleep 2;
-      done;
-      echo 'Kafka disponible. Iniciando worker...';
-      npm run start-worker;
-      "
+      node -e "
+      const net = require('net');
+      const check = () => {
+        const socket = net.connect(29092, 'kafka', () => {
+          console.log('Kafka detectado, iniciando worker...');
+          process.exit(0);
+        });
+        socket.on('error', () => {
+          console.log('Esperando Kafka...');
+          setTimeout(check, 2000);
+        });
+      };
+      check();
+      " && npm run start-worker
     environment:
       KAFKA_BROKER: kafka:29092
       NODE_ENV: production
