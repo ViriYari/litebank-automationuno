@@ -70,9 +70,13 @@ jobs:
 
       # Debug de worker en caso de error
       - name: Debug logs worker
-        if: failure()
-        run: docker logs qa-backend-worker
-
+        if: always()
+        run: |
+          echo "--- BUSCANDO ERRORES EN EL WORKER ---"
+          # Buscamos específicamente cualquier línea que contenga 'Error' o 'Exception'
+          docker logs qa-backend-worker | grep -iE 'error|exception|fail' || echo "No se encontraron errores directos, mostrando últimos logs:"
+          docker logs qa-backend-worker --tail 50
+          
       # 7. Ejecutar tests
       - name: Ejecutar tests
         run: mvn test
