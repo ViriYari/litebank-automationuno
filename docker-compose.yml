@@ -84,21 +84,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: >
-      node -e "
-      const net = require('net');
-      const check = () => {
-        const socket = net.connect(29092, 'kafka', () => {
-          console.log('Kafka detectado, iniciando worker...');
-          process.exit(0);
-        });
-        socket.on('error', () => {
-          console.log('Esperando Kafka...');
-          setTimeout(check, 2000);
-        });
-      };
-      check();
-      " && npm run start-worker
+    command: sh -c "npm install && npm run start-worker || tail -f /dev/null"
     environment:
       KAFKA_BROKER: kafka:29092
       NODE_ENV: development
