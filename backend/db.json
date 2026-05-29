@@ -1631,6 +1631,17 @@
       "responseTimeMs": 5274,
       "workerBucket": "RANDOM_FAST",
       "effectiveDelayMs": 5251
+    },
+    "TX-1780039042954": {
+      "target": "98765",
+      "amount": "100",
+      "status": "APROBADO",
+      "simulationProfile": "RANDOM",
+      "createdAt": 1780039042954,
+      "processedAt": 1780039062046,
+      "responseTimeMs": 19092,
+      "workerBucket": "RANDOM_FAST",
+      "effectiveDelayMs": 19065
     }
   }
 }
