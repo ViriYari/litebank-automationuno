@@ -23,7 +23,7 @@ jobs:
 
       # 3. Levantar Docker (Kafka + frontend + todo)
       - name: Levantar servicios
-        run: docker compose up -d --build
+        run: docker compose up -d --build --wait
 
       # 4. Ver contenedores (debug)
       - name: Ver contenedores
