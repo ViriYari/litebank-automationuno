@@ -66,6 +66,10 @@ jobs:
         env:
           BASE_URL: http://localhost:5173
 
+      - name: Capturar logs finales del servidor
+        if: always()
+        run: docker logs qa-backend-server --tail 100    
+
       - name: Apagar Docker
         if: always()
         run: docker compose down
