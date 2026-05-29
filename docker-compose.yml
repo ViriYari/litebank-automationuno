@@ -52,8 +52,6 @@ services:
         /opt/kafka/bin/kafka-topics.sh --bootstrap-server kafka:29092 --create --if-not-exists --topic transferencias-creadas --partitions 1 --replication-factor 1
         echo "Topic transferencias-creadas listo"
         
-        # 2. Comando para mantener el contenedor vivo indefinidamente
-        tail -f /dev/null
     networks:
       - qa-network
 
